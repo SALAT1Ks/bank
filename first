@@ -1,0 +1,100 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QWidget, QStackedWidget
+from PyQt5.QtGui import QPixmap, QMovie
+from PyQt5.QtCore import QTimer, QEvent, QCoreApplication
+
+class TimerEvent(QEvent):
+    TIMER_EVENT_TYPE = QEvent.Type(QEvent.registerEventType())
+
+    def __init__(self):
+        super().__init__(self.TIMER_EVENT_TYPE)
+
+class App(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Приложение с фоновым изображением")
+        self.setFixedSize(1080, 800)
+        # Create a stacked widget to manage multiple pages
+        self.stacked_widget = QStackedWidget(self)
+        self.setCentralWidget(self.stacked_widget)
+
+        # Page 1: Background Image and Button
+        self.page1 = QWidget(self)
+        self.stacked_widget.addWidget(self.page1)
+
+        background_label = QLabel(self.page1)
+        pixmap = QPixmap("C:\\Users\\oppoe\\Downloads\\second_screen.png")
+        background_label.setPixmap(pixmap)
+        background_label.setGeometry(0, 0, pixmap.width(), pixmap.height())
+
+        copilka = QPushButton("", self.page1)
+        copilka.clicked.connect(self.show_gif_page)
+        copilka.setGeometry(550, 350, 250, 150)
+        copilka.setStyleSheet("background-color: transparent; border: none; color: white;")
+
+        # Page 2: GIF
+        self.page2 = QWidget(self)
+        self.stacked_widget.addWidget(self.page2)
+
+        self.gif_label = QLabel(self.page2)
+        movie = QMovie("C:\\Users\\oppoe\\Downloads\\-.gif")  # Replace with the actual path to your GIF
+        self.gif_label.setMovie(movie)
+        movie.start()
+
+        # Page 3: Button after a delay
+        self.page3 = QWidget(self)
+        self.stacked_widget.addWidget(self.page3)
+
+        background_label_2 = QLabel(self.page3)
+        pixmap_2 = QPixmap('C:\\Users\\oppoe\\Downloads\\third_second.png')
+        background_label_2.setPixmap(pixmap_2)
+        background_label_2.setGeometry(0, 0, pixmap_2.width(), pixmap_2.height())
+
+        bank = QPushButton("Next Page", self.page3)
+        bank.clicked.connect(self.show_gif_page_2)  # Connect to show_gif_page_2
+        bank.setGeometry(100, 350, 250, 150)
+        # bank.setStyleSheet("background-color: transparent; border: none; color: white;")
+
+        # Page 4
+        self.page4 = QWidget(self)
+        self.stacked_widget.addWidget(self.page4)
+
+        self.gif_label_2 = QLabel(self.page4)
+        movie_2 = QMovie("C:\\Users\\oppoe\\Downloads\\-.gif")  # Replace with the actual path to your GIF
+        self.gif_label_2.setMovie(movie_2)
+        movie_2.start()
+
+        # Set initial page
+        self.stacked_widget.setCurrentWidget(self.page1)
+
+    def show_gif_page(self):
+        self.stacked_widget.setCurrentWidget(self.page2)
+
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.show_page3_with_delay(timer))
+        timer.start(2000)
+
+    def show_page3_with_delay(self, timer):
+        timer.stop()
+        self.stacked_widget.setCurrentWidget(self.page3)
+
+        # Post a custom event to the application event loop
+        QCoreApplication.postEvent(self, TimerEvent())
+
+    def show_gif_page_2(self):
+        self.stacked_widget.setCurrentWidget(self.page4)
+
+        timer = QTimer(self)
+        timer.timeout.connect(lambda: self.show_page1_with_delay(timer))
+        timer.start(2000)
+
+    def show_page1_with_delay(self, timer):
+        timer.stop()
+        self.stacked_widget.setCurrentWidget(self.page1)
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = App()
+    window.show()
+    sys.exit(app.exec_())
